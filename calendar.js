@@ -168,10 +168,16 @@ class Calendar {
             /**
              * 月份转农历称呼速查表
              * @Array Of Property
-             * @trans ['正','一','二','三','四','五','六','七','八','九','十','冬','腊']
+             * @trans ['正','二','三','四','五','六','七','八','九','十','冬','腊']
              * @return Cn string
              */
             nStr3: ["\u6b63", "\u4e8c", "\u4e09", "\u56db", "\u4e94", "\u516d", "\u4e03", "\u516b", "\u4e5d", "\u5341", "\u51ac", "\u814a"],
+            
+            /**
+             * @trans ['零','一','二','三','四','五','六','七','八','九']
+             */
+            nStr4: ["\u96f6","\u4e00","\u4e8c", "\u4e09", "\u56db", "\u4e94", "\u516d", "\u4e03", "\u516b", "\u4e5d"],
+            
         }
     }
     /**
@@ -386,6 +392,14 @@ class Calendar {
         }
         return (s);
     }
+    toUppercaseNumber(num) {
+        let newNum='';
+        const { nStr4 } = this.state;
+        num.toString().split("").forEach(ele => {
+            newNum+=nStr4[Number(ele)];
+        });
+        return newNum;
+    }
 
     /**
      * 年份转生肖[!仅能大致转换] => 精确划分生肖分界线是“立春”
@@ -516,6 +530,7 @@ class Calendar {
             astro = this.toAstro(m, d); //该日期所属的星座
 
         return {
+            'Lunar calendar农历':this.toUppercaseNumber(year)+ (isLeap ? "\u95f0" : '') + this.toChinaMonth(month)+this.toChinaDay(day),
             'lYear': year,
             'lMonth': month,
             'lDay': day,
@@ -528,12 +543,11 @@ class Calendar {
             'gzYear': gzY,
             'gzMonth': gzM,
             'gzDay': gzD,
-            'isLeap': isLeap,
             'nWeek': nWeek,
             'ncWeek': "\u661f\u671f" + cWeek,
-            'isTerm': isTerm,
             'Term': Term,
-            'astro': astro
+            'astro': astro,
+            'Solar calendar公历': `${y}-${m}-${d}`
         };
     }
 
@@ -552,17 +566,10 @@ class Calendar {
         d = Number(d);
         isLeapMonth = !!isLeapMonth;
 
-        let leapMonth = this.leapMonth(y);
-        let leapDay = this.leapDays(y);
-        if (isLeapMonth && (leapMonth != m)) {
+        if (isNaN(y) || isNaN(m) || isNaN(d) || y < 1900 || y > 2100 || m < 1 || m > 12 || d < 1 || d > 31 || y == 1900 && m == 1 && d < 31) {
             return -1;
-        } //传参要求计算该闰月公历 但该年得出的闰月与传参的月份并不同
-        if (y == 2100 && m == 12 && d > 1 || y == 1900 && m == 1 && d < 31) {
-            return -1;
-        } //超出了最大极限值
-        let day = this.monthDays(y, m);
-        let _day = day;
-        //bugFix 2016-9-25
+        }
+        let day = this.monthDays(y, m), _day = day;
         //if month is leap, _day use leapDays method
         if (isLeapMonth) {
             _day = this.leapDays(y, m);
