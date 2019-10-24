@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<script src="./calendar.js"></script>
+<style>
+    .root {
+        width: 100%;
+        height: 500px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-flow: column nowrap;
+    }
+    .input {
+        width: 100%;
+        height: 100%; 
+    }
+</style>
+
+<body>
+    <div class="root">
+        <input type="text" value="1995.8.23" id="data">
+        <label for="checkbox">
+            <input type="checkbox" name="checkbox" id="checkbox">
+            <span>是否闰月</span>
+        </label>
+        <span>eg:1987.11.01</span>
+        <button onclick="window.click('solar2lunar')">公历年月日转农历数据</button>
+        <button onclick="window.click('lunar2solar')">农历年月日转公历年月日 </button>
+        <div id="v"></div>
+    </div>
+    
+</body>
+<script>
+    let calendar = new Calendar()
+    window.click = function(type) {
+        var v,d,
+            data = document.getElementById("data").value,
+            check = document.getElementById("checkbox").checked;
+        d = data.split('.');
+        console.log('data',d,type,check)
+
+        if(data && d.length === 3){
+            type === 'solar2lunar' ?
+           v = calendar.solar2lunar(...d)
+           :type === 'lunar2solar' ?
+           v = calendar.lunar2solar(...d,check): '';
+
+           console.log(v)
+
+        }
+    }
+</script>
+</html>
