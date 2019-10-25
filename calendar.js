@@ -172,12 +172,12 @@ class Calendar {
              * @return Cn string
              */
             nStr3: ["\u6b63", "\u4e8c", "\u4e09", "\u56db", "\u4e94", "\u516d", "\u4e03", "\u516b", "\u4e5d", "\u5341", "\u51ac", "\u814a"],
-            
+
             /**
              * @trans ['零','一','二','三','四','五','六','七','八','九']
              */
-            nStr4: ["\u96f6","\u4e00","\u4e8c", "\u4e09", "\u56db", "\u4e94", "\u516d", "\u4e03", "\u516b", "\u4e5d"],
-            
+            nStr4: ["\u96f6", "\u4e00", "\u4e8c", "\u4e09", "\u56db", "\u4e94", "\u516d", "\u4e03", "\u516b", "\u4e5d"],
+
         }
     }
     /**
@@ -393,10 +393,12 @@ class Calendar {
         return (s);
     }
     toUppercaseNumber(num) {
-        let newNum='';
-        const { nStr4 } = this.state;
+        let newNum = '';
+        const {
+            nStr4
+        } = this.state;
         num.toString().split("").forEach(ele => {
-            newNum+=nStr4[Number(ele)];
+            newNum += nStr4[Number(ele)];
         });
         return newNum;
     }
@@ -412,6 +414,58 @@ class Calendar {
     }
 
     /**
+     * 传入农历年月日以及传入的月份是否闰月获得详细的公历、农历object信息 <=>JSON
+     * @param y  lunar year
+     * @param m  lunar month
+     * @param d  lunar day
+     * @param isLeapMonth  lunar month is leap or not.[如果是农历闰月第四个参数赋值true即可]
+     * @return JSON object
+     * @eg:console.log(calendar.lunar2solar(1987,9,10));
+     */
+    lunar2solar(y, m, d, isLeapMonth) { //参数区间1900.1.31~2100.12.1
+
+        let day = this.monthDays(y, m),
+            _day = day;
+        //if month is leap, _day use leapDays method
+        if (isLeapMonth) {
+            _day = this.leapDays(y, m);
+        }
+        if (y < 1900 || y > 2100 || d > _day) {
+            return -1;
+        } // 合法性效验
+
+        //计算农历的时间差
+        let offset = 0;
+        for (let i = 1900; i < y; i++) {
+            offset += this.lYearDays(i);
+        }
+        let leap = 0,
+            isAdd = false;
+        for (let i = 1; i < m; i++) {
+            leap = this.leapMonth(y);
+            if (!isAdd) { //处理闰月
+                if (leap <= i && leap > 0) {
+                    offset += this.leapDays(y);
+                    isAdd = true;
+                }
+            }
+            offset += this.monthDays(y, i);
+        }
+        //转换闰月农历 需补充该年闰月的前一个月的时差
+        if (isLeapMonth) {
+            offset += day;
+        }
+        //1900年农历正月一日的公历时间为1900年1月30日0时0分0秒(该时间也是本农历的最开始起始点)
+        let stmap = Date.UTC(1900, 1, 30, 0, 0, 0);
+        let calObj = new Date((offset + d - 31) * 86400000 + stmap);
+        let cY = calObj.getUTCFullYear();
+        let cM = calObj.getUTCMonth() + 1;
+        let cD = calObj.getUTCDate();
+
+        return this.solar2lunar(cY, cM, cD);
+    }
+
+    /**
      * 传入阳历年月日获得详细的公历、农历object信息 <=>JSON
      * @param y  solar year
      * @param m  solar month
@@ -420,13 +474,7 @@ class Calendar {
      * @eg:console.log(calendar.solar2lunar(1987,11,01));
      */
     solar2lunar(y, m, d) { //参数区间1900.1.31~2100.12.31
-        y = Number(y);
-        m = Number(m);
-        d = Number(d);
 
-        if (isNaN(y) || isNaN(m) || isNaN(d) || y < 1900 || y > 2100 || m < 1 || m > 12 || d < 1 || d > 31 || y == 1900 && m == 1 && d < 31) {
-            return -1;
-        }
         const {
             nStr1,
             solarTerm
@@ -530,7 +578,7 @@ class Calendar {
             astro = this.toAstro(m, d); //该日期所属的星座
 
         return {
-            'Lunar calendar农历':this.toUppercaseNumber(year)+ (isLeap ? "\u95f0" : '') + this.toChinaMonth(month)+this.toChinaDay(day),
+            'Lunar_calendar农历': this.toUppercaseNumber(year) + (isLeap ? "\u95f0" : '') + this.toChinaMonth(month) + this.toChinaDay(day),
             'lYear': year,
             'lMonth': month,
             'lDay': day,
@@ -543,69 +591,103 @@ class Calendar {
             'gzYear': gzY,
             'gzMonth': gzM,
             'gzDay': gzD,
-            'nWeek': nWeek,
+            // 'nWeek': nWeek,
             'ncWeek': "\u661f\u671f" + cWeek,
             'Term': Term,
             'astro': astro,
-            'Solar calendar公历': `${y}-${m}-${d}`
+            'Solar_calendar公历': `${y}-${m}-${d}`
         };
     }
+    /**
+     * 
+     * @param y 
+     * @param m   
+     * @param d   
+     * @return  object
+     */
+    nextBirthday(y,m,d) {
+        let now  = new Date(),
+            nowYear = now.getFullYear(),
+            nowMounth = now.getMonth()+1,
+            nowDay = now.getDate();
+
+        this.timeDifference(`${nowYear}-${m}-${d}`,`${nowYear}-${nowMounth}-${nowDay}`)
+        // 今年是否过了生日
+        if( m < nowMounth  || (m == nowMounth && d < nowDay)){
+
+        }   
+        
+    }
+    /**
+     * 时间差计算
+     * @param d1 2006-12-18格式    
+     * @param d2
+     * @return  object
+     */
+    timeDifference(d1, d2) {  
+        let i,d;    
+       
+          i = Math.abs(Date.parse(d1) - Date.parse(d2));      
+       
+          d = Math.floor(i / (24 * 3600 * 1000));        
+       
+          return d    
+       };
+
 
     /**
-     * 传入农历年月日以及传入的月份是否闰月获得详细的公历、农历object信息 <=>JSON
-     * @param y  lunar year
-     * @param m  lunar month
-     * @param d  lunar day
-     * @param isLeapMonth  lunar month is leap or not.[如果是农历闰月第四个参数赋值true即可]
-     * @return JSON object
-     * @eg:console.log(calendar.lunar2solar(1987,9,10));
+     * 
+     * @param type  类型 Str
+     * @param date  时间 Arr
+     * @param isLeapMonth  是否是闰月 Bool
+     * @return  object
+     *      {
+     *  农历生日：
+     *  公历生日：
+     *  下一个生日：
+     *  距今天：
+     *  
+     *  }
      */
-    lunar2solar(y, m, d, isLeapMonth) { //参数区间1900.1.31~2100.12.1
+    getBirthday(type, date, isLeapMonth) {
+        let res,
+            birth, 
+            now = new Date(),
+            next,
+            nowYear = now.getFullYear(),
+            nowMounth = now.getMonth()+1,
+            nowDay = now.getDate(),
+            [y, m, d] = date;
         y = Number(y);
         m = Number(m);
         d = Number(d);
         isLeapMonth = !!isLeapMonth;
-
+        console.log('noweeeeeeeeeee',nowYear,nowMounth,nowDay)
         if (isNaN(y) || isNaN(m) || isNaN(d) || y < 1900 || y > 2100 || m < 1 || m > 12 || d < 1 || d > 31 || y == 1900 && m == 1 && d < 31) {
             return -1;
         }
-        let day = this.monthDays(y, m), _day = day;
-        //if month is leap, _day use leapDays method
-        if (isLeapMonth) {
-            _day = this.leapDays(y, m);
-        }
-        if (y < 1900 || y > 2100 || d > _day) {
-            return -1;
-        } //参数合法性效验
 
-        //计算农历的时间差
-        let offset = 0;
-        for (let i = 1900; i < y; i++) {
-            offset += this.lYearDays(i);
-        }
-        let leap = 0,
-            isAdd = false;
-        for (let i = 1; i < m; i++) {
-            leap = this.leapMonth(y);
-            if (!isAdd) { //处理闰月
-                if (leap <= i && leap > 0) {
-                    offset += this.leapDays(y);
-                    isAdd = true;
-                }
-            }
-            offset += this.monthDays(y, i);
-        }
-        //转换闰月农历 需补充该年闰月的前一个月的时差
-        if (isLeapMonth) {
-            offset += day;
-        }
-        //1900年农历正月一日的公历时间为1900年1月30日0时0分0秒(该时间也是本农历的最开始起始点)
-        let stmap = Date.UTC(1900, 1, 30, 0, 0, 0);
-        let calObj = new Date((offset + d - 31) * 86400000 + stmap);
-        let cY = calObj.getUTCFullYear();
-        let cM = calObj.getUTCMonth() + 1;
-        let cD = calObj.getUTCDate();
+        switch (type) {
+            case 'lunar':
+                res = this.lunar2solar(y, m, d, isLeapMonth)
+                break;
+            case 'solar':
+                // res = this.solar2lunar(y, m, d)
 
-        return this.solar2lunar(cY, cM, cD);
+                break;
+            default:
+                res = -1;
+        }
+
+        // now = new Date(now.toISOString().substring(0, 10))
+        // birth = new Date(res.Solar_calendar公历);
+
+        // if (now - birth)
+
+        //     console.log(now - birth)
+
+
+        return res;
     }
+
 }

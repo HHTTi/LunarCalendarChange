@@ -30,14 +30,14 @@
             <span>是否闰月</span>
         </label>
         <span>eg:1987.11.01</span>
-        <button onclick="window.change('solar2lunar')">公历年月日转农历数据</button>
-        <button onclick="window.change('lunar2solar')">农历年月日转公历年月日 </button>
+        <button onclick="window.change('solar')">公历   </button>
+        <button onclick="window.change('lunar')">农历年月日转公历年月日 </button>
         <div id="v"></div>
     </div>
     
 </body>
 <script>
-    let calendar = new Calendar();
+    const calendar = new Calendar();
     window.change = function(type) {
         var v,d,
             data = document.getElementById("data").value,
@@ -46,10 +46,8 @@
         console.log('data',d,type,check)
 
         if(data && d.length === 3){
-            type === 'solar2lunar' ?
-           v = calendar.solar2lunar(...d)
-           :type === 'lunar2solar' ?
-           v = calendar.lunar2solar(...d,check): '';
+          
+           v = calendar.getBirthday(type,d,check);
 
            console.log(v)
         }
