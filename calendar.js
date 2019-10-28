@@ -599,40 +599,46 @@ class Calendar {
         };
     }
     /**
-     * 
+     * 距今天 下个生日
      * @param y 
      * @param m   
      * @param d   
-     * @return  object
+     * @return  object 
      */
-    nextBirthday(y,m,d) {
-        let now  = new Date(),
-            nowYear = now.getFullYear(),
-            nowMounth = now.getMonth()+1,
-            nowDay = now.getDate();
+    nextBirthdayFromToday(y,m,d) {
+        let timeDiff,
+            nextBirth,
+            fromToday,
+            now  = new Date(),
+            thisYear = now.getFullYear(),
+            thisMounth = now.getMonth()+1,
+            today = now.getDate();
 
-        this.timeDifference(`${nowYear}-${m}-${d}`,`${nowYear}-${nowMounth}-${nowDay}`)
+        timeDiff = this.timeDifference(`${thisYear}-${m}-${d}`,`${thisYear}-${thisMounth}-${today}`)
         // 今年是否过了生日
-        if( m < nowMounth  || (m == nowMounth && d < nowDay)){
-
-        }   
+        if( timeDiff >= 0 ){
+            fromToday = timeDiff;
+        }else {
+            fromToday = this.timeDifference(`${thisYear + 1}-${m}-${d}`,`${thisYear}-${thisMounth}-${today}`);
+        }
         
+        return fromToday;
     }
     /**
      * 时间差计算
      * @param d1 2006-12-18格式    
      * @param d2
-     * @return  object
+     * @return  number
      */
     timeDifference(d1, d2) {  
         let i,d;    
        
-          i = Math.abs(Date.parse(d1) - Date.parse(d2));      
-       
-          d = Math.floor(i / (24 * 3600 * 1000));        
-       
-          return d    
-       };
+        i = Date.parse(d1) - Date.parse(d2);      
+    
+        d = Math.floor(i / (24 * 3600 * 1000));
+
+        return d    
+    };
 
 
     /**
@@ -640,54 +646,77 @@ class Calendar {
      * @param type  类型 Str
      * @param date  时间 Arr
      * @param isLeapMonth  是否是闰月 Bool
-     * @return  object
-     *      {
-     *  农历生日：
+     * @return  object {
+     *  农历生日
      *  公历生日：
-     *  下一个生日：
+     *  next : 下一个生日
      *  距今天：
      *  
      *  }
      */
     getBirthday(type, date, isLeapMonth) {
-        let res,
-            birth, 
-            now = new Date(),
+        let lunar_thisYearBirth,
+            lunar_nextYearBirth,
+            fromToday,
+            timeDiff,
+            birthday, 
             next,
-            nowYear = now.getFullYear(),
-            nowMounth = now.getMonth()+1,
-            nowDay = now.getDate(),
+            nextBirthday,
+            now  = new Date(),
+            thisYear = now.getFullYear(),
+            nowDay = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`,
             [y, m, d] = date;
         y = Number(y);
         m = Number(m);
         d = Number(d);
         isLeapMonth = !!isLeapMonth;
-        console.log('noweeeeeeeeeee',nowYear,nowMounth,nowDay)
+
         if (isNaN(y) || isNaN(m) || isNaN(d) || y < 1900 || y > 2100 || m < 1 || m > 12 || d < 1 || d > 31 || y == 1900 && m == 1 && d < 31) {
             return -1;
         }
 
         switch (type) {
             case 'lunar':
-                res = this.lunar2solar(y, m, d, isLeapMonth)
+                // birthday = this.lunar2solar(y, m, d, isLeapMonth);
+
+                // lunar_thisYearBirth = this.lunar2solar(thisYear, m, d);
+
+                let {cYear, cMonth, cDay} = this.lunar2solar(thisYear, m, d);
+
+                nextBirthday = `${cYear}-${cMonth}-${cDay}`;
+
+                timeDiff = this.timeDifference(nextBirthday,nowDay);
+
+                if( timeDiff >= 0) {
+                    fromToday = timeDiff;
+                }else {
+                    // lunar_nextYearBirth = this.lunar2solar(thisYear+1, m, d);
+
+                    let {cYear, cMonth, cDay} = this.lunar2solar(thisYear+1, m, d);
+
+                    nextBirthday = `${cYear}-${cMonth}-${cDay}`;
+
+                    fromToday = this.timeDifference(nextBirthday,nowDay);
+                }
                 break;
             case 'solar':
-                // res = this.solar2lunar(y, m, d)
+                // birthday = this.solar2lunar(y, m, d);
+                nextBirthday = `${thisYear}-${m}-${d}`;
 
+                timeDiff = this.timeDifference(nextBirthday,nowDay);
+                if(timeDiff >= 0){
+                    fromToday = timeDiff;
+                }else {
+                    nextBirthday = `${thisYear +1}-${m}-${d}`;
+
+                    fromToday = this.timeDifference(nextBirthday,nowDay);
+                }
                 break;
             default:
-                res = -1;
+                next = -1;
         }
 
-        // now = new Date(now.toISOString().substring(0, 10))
-        // birth = new Date(res.Solar_calendar公历);
-
-        // if (now - birth)
-
-        //     console.log(now - birth)
-
-
-        return res;
+        return {nextBirthday,fromToday};
     }
 
 }
