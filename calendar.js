@@ -655,12 +655,10 @@ class Calendar {
      *  }
      */
     getBirthday(type, date, isLeapMonth) {
-        let lunar_thisYearBirth,
-            lunar_nextYearBirth,
+        let 
             fromToday,
             timeDiff,
             birthday, 
-            next,
             nextBirthday,
             now  = new Date(),
             thisYear = now.getFullYear(),
@@ -676,7 +674,7 @@ class Calendar {
         }
 
         switch (type) {
-            case 'lunar':
+            case 'lunar':{
                 // birthday = this.lunar2solar(y, m, d, isLeapMonth);
 
                 // lunar_thisYearBirth = this.lunar2solar(thisYear, m, d);
@@ -699,7 +697,8 @@ class Calendar {
                     fromToday = this.timeDifference(nextBirthday,nowDay);
                 }
                 break;
-            case 'solar':
+            }
+            case 'solar':{
                 // birthday = this.solar2lunar(y, m, d);
                 nextBirthday = `${thisYear}-${m}-${d}`;
 
@@ -712,6 +711,7 @@ class Calendar {
                     fromToday = this.timeDifference(nextBirthday,nowDay);
                 }
                 break;
+            }
             default:
                 next = -1;
         }
@@ -720,3 +720,5 @@ class Calendar {
     }
 
 }
+
+module.exports = Calendar;

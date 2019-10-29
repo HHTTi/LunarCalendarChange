@@ -7,19 +7,26 @@ use meizu;
 DROP TABLE IF EXISTS `birthday_remind`;
 CREATE TABLE `birthday_remind` (
   `id`              int(11) NOT NULL auto_increment,
+  `uid`             int(11) NOT NULL,
   `create_time`     datetime default NULL, --提交时间
   `token`           varchar(128) default NULL,
   `openid`          varchar(128) default NULL,
 
-  `name`            varchar(128) default NULL,
- 
+  `nickname`        varchar(128) default NULL,
+  `birthday`        date default NULL,
+  `calendar`        char(10) default NULL,
+  `content`         varchar(256) default NULL,
+  `phone`           int(11) default NULL, 
+  `remind_time`     datetime default NULL, 
+  `is_repeat`       tinyint(1) default NULL, 
+
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET= utf8mb4;
 
 -- ----------------------------
 -- Records of birthday_remind
 -- ----------------------------
-INSERT INTO `birthday_remind` VALUES (1, 'test', 'test', '骁龙845 屏幕下指纹',  '2222555ds2f', '2699', 'eeeeeeeeeeeeeeeeeeeeee');
+INSERT INTO `birthday_remind` VALUES (1, 1, NULL, 'token',  'openid', 'nickname', '2019-10-1','solar','contentcontentcontent',13366020621,Null,1);
 
 
 
@@ -42,7 +49,7 @@ CREATE TABLE `remind_user_info` (
   `phone`    int(11) default NULL,
   `token`    varchar(128) default NULL,
   PRIMARY KEY  (`uid`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET= utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET= utf8mb4;
 
 -- ----------------------------
 -- Records of remind_user_info
