@@ -1,9 +1,7 @@
 /**
  * @1900-2100区间内的公历、农历互转
  * @charset UTF-8
- * @Version 1.0.3
- * @公历转农历：calendar.solar2lunar(1987,11,01); //[you can ignore params of prefix 0]
- * @农历转公历：calendar.lunar2solar(1987,09,10); //[you can ignore params of prefix 0]
+ * 
  */
 "use strict";
 class Calendar {
@@ -644,7 +642,7 @@ class Calendar {
     /**
      * 
      * @param type  类型 Str
-     * @param date  时间 Arr
+     * @param date  时间 str  '2017-10-01'
      * @param isLeapMonth  是否是闰月 Bool
      * @return  object {
      *  农历生日
@@ -663,7 +661,7 @@ class Calendar {
             now  = new Date(),
             thisYear = now.getFullYear(),
             nowDay = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`,
-            [y, m, d] = date;
+            [y, m, d] = date.split('-');
         y = Number(y);
         m = Number(m);
         d = Number(d);
@@ -674,7 +672,7 @@ class Calendar {
         }
 
         switch (type) {
-            case 'lunar':
+            case 'lunar':{
                 // birthday = this.lunar2solar(y, m, d, isLeapMonth);
 
                 // lunar_thisYearBirth = this.lunar2solar(thisYear, m, d);
@@ -697,7 +695,8 @@ class Calendar {
                     fromToday = this.timeDifference(nextBirthday,nowDay);
                 }
                 break;
-            case 'solar':
+            }
+            case 'solar':{
                 // birthday = this.solar2lunar(y, m, d);
                 nextBirthday = `${thisYear}-${m}-${d}`;
 
@@ -710,6 +709,7 @@ class Calendar {
                     fromToday = this.timeDifference(nextBirthday,nowDay);
                 }
                 break;
+            }
             default:
                 next = -1;
         }
@@ -719,4 +719,4 @@ class Calendar {
 
 }
 
-module.exports = Calendar;
+// module.exports = Calendar;

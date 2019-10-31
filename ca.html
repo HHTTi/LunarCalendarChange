@@ -42,12 +42,14 @@
         var v,d,
             data = document.getElementById("data").value,
             check = document.getElementById("checkbox").checked;
+            
+        let b = calendar.getBirthday(type,data,check);
         d = data.split('.');
         console.log('data',d,type,check)
-
+        console.log('==',b)
         if(data && d.length === 3){
           
-           v = calendar.getBirthday(type,d,check);
+           v = calendar.solar2lunar(...d,check);
 
            console.log(v)
         }
